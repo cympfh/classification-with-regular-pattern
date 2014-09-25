@@ -10,18 +10,24 @@ module.exports = (TP, TQ, U, options) ->
     TP = TP[0 ... N]
     TQ = TQ[0 ... N]
 
-  if options.iteration
+  if options.iteration?
     iteration = options.iteration
   else
     iteration = (TP.length / 9) | 0
 
-  if options.threshold
+  if options.threshold?
     threshold = options.threshold
   else
     threshold = null
 
   PiP = ep iteration, threshold, TP, TQ
   PiQ = ep iteration, threshold, TQ, TP
+
+  if options.debug?
+    console.warn "## pattern for P (#{PiP.length})"
+    PiP.forEach (p) -> console.log pattern2str p
+    console.warn "## pattern for P (#{PiQ.length})"
+    PiQ.forEach (p) -> console.log pattern2str p
 
   score =
     P: 0
