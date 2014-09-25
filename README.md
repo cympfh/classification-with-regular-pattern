@@ -28,6 +28,11 @@ p -> q
 ```
 と書く。
 
+> 嘘です。
+> `q \preceq p`
+> と書きます。
+> 半順序
+
 p is genelization of q と読む。
 
 文字列 s, t に対して
