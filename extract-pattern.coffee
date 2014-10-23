@@ -17,9 +17,6 @@
 mcp = require './mcp'
 {can_generalize, pattern2str} = require './syntax'
 
-isBR = (pat) ->
-  pat.length is 6 and pat[0].str is '<' and pat[1].var?  and pat[2].str is 'b' and pat[3].var?  and pat[4].str is 'r' and pat[5].var?
-
 random_select = (list) ->
   I = list.length
   return false if I is 0
@@ -78,12 +75,6 @@ extract_pattern = (docs, options) ->
         pnoty = (lens[j] - matches[j]) / sum_lens
         pnot = 1 - pmatch
         pmatchy * Math.log (pmatchy / pmatch / py) + pnoty * Math.log (pnoty / pnot / py))
-
-      if isBR p
-        console.warn MI
-        console.warn pattern2str p
-        console.warn matches
-
 
       if MI > m
         j = max_index matches
