@@ -1,8 +1,17 @@
 ###
-# k: iteration  times
-# m: threshold (must > EP.length / (EP.length + EQ.length))
-# EP: array of documents with class P
-# EQ: array of documents with class Q
+#
+# extract :: docs -> pattern_sets
+#
+# doc :: [sentences]
+# docs :: [doc]
+# pattern_set :: [pattern]
+# pattern_sets :: [pattern_set]
+#
+# docs.length === pattern_sets.length
+#
+# docs[i] is class-i document
+# pattern_sets[i] is the set of patterns for class-i
+#
 ###
 
 mcp = require './mcp'
@@ -17,46 +26,73 @@ random_select = (list) ->
   idx = (do Math.random) * I | 0
   list[idx]
 
-extract_pattern = (k, m, EP, EQ, debug = false) ->
+add = (x, y) -> x + y
+sum = (ls) -> ls.reduce add
 
-  Pi = [] # return value
+max_index = (ls) ->
+  mx = ls[0]
+  mi = 0
+  for i in [1 ... ls.length]
+    if mx < ls[i]
+      mx = ls[i]
+      mi = i
+  mi
 
-  if m is null
-    m = EP.length / (EP.length + EQ.length) * 1.1
+extract_pattern = (docs, debug = false) ->
 
-  rec = (k) ->
+  N = docs.length
+  lens = for d in docs
+    d.length
+  sum_lens = lens.reduce add
 
-    return Pi if k < 0
+  ranks = for i in [0 ... N]
+    []
 
-    e1 = random_select EP
-    e2 = random_select EP
+  # mutual information threshold
+  #m = EP.length / (EP.length + EQ.length) * 1.1
 
-    return rec k if e1 is e2
+  iterate = 1000
 
-    p = mcp e1, e2
+  for k in [0 ... iterate]
 
-    goodness =
-      EP.filter (e) -> can_generalize p, e
-        .length
+    for i in [0 ... N]
+      d = docs[i]
 
-    badness =
-      EQ.filter (e) -> can_generalize p, e
-        .length
+      e1 = random_select d
+      e2 = random_select d
+      p = mcp e1, e2
 
-    score = (goodness / (goodness + badness))
+      if p.length is 1 and p[0].var?
+        continue
 
-    if debug
-      console.warn "pattern", pattern2str p
-      console.warn "goodness, badness, push?", goodness, badness, (score > m)
-      console.warn ''
+      matches = for j in [0 ... N]
+        docs[j].filter (d) -> can_generalize p, d
+          .length
 
-    if score >= m
-      Pi.push p
-      EP = EP.filter (e) ->
-        not can_generalize p, e
+      sum_matches = matches.reduce add
 
-    return rec k - 1
+      MI = sum (for j in [0 ... N]
+        pmatchy = matches[j] / sum_lens
+        pmatch = sum_matches / sum_lens
+        py = lens[j] / sum_lens
+        pnoty = (lens[j] - matches[j]) / sum_lens
+        pnot = 1 - pmatch
+        pmatchy * Math.log (pmatchy / pmatch / py) + pnoty * Math.log (pnoty / pnot / py))
 
-  rec k
+      if MI > 0
+        j = max_index matches
+        ranks[j].push
+          pattern: p
+          mi: MI
+
+  # filter better patterns from ranks
+  sets = []
+  for i in [0 ... N]
+    ranks[i].sort (a, b) -> - a.mi + b.mi
+    sets[i] = for j in [0 ... iterate/100]
+      #console.warn pattern2str ranks[i][j].pattern
+      ranks[i][j].pattern
+
+  sets
 
 module.exports = extract_pattern

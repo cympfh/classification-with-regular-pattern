@@ -127,123 +127,146 @@ PiP, PiQ を構成ですれば、
 extract-pattern.coffee
 ---
 
-文字列集合 TPとTQから、なるべくTP を生成して、なるべく TQ を生成しないような
-パターン集合 Pi を返す。
+以下を `k` 回繰り返す
 
-score.coffee
+> 同じクラスのドキュメントからランダムに2文を選択し、
+> その極小共通汎化 `p` を求める。
+> 
+> `p` の有用さを、相互情報量で計る。
+> また、`p` が最も多くマッチしたクラスを `k` とする。
+> `k` は、初め選んだドキュメントのクラスと一致していてほしいのだけど、
+> そう上手くも行かなかった。
+> 
+> 閾値 `m` を設定し、(今は `0` としている)
+> 相互情報量が `m` よりも真に大きかったら、
+> `p`
+> を
+> `k` 向けのパターンとして、その相互情報量とペアにして持つ。
+
+一度取り出したパターンによって、
+その言語を元のドキュメントから削除する、というのもあったけど、
+今回はしていない。
+つまり、同じパターンが何度も取れてしまうかもしれない。
+
+それでもいいと思う。
+だって、パターンごとに重みをつけることをしないから。
+
+各クラス向けパターン集合から、
+相互情報量でソートして、トップの1%だけを
+取り出して、これを結果として返す。
+
+pattern-classify.coffee
 ---
 
-一つの文 d と、Pi, TP, TQ を受け取って、
-Pi の内 d を生成するようなパターンの集合のうち、
-TPを生成する数から、TQを生成する数を引き算して、
-dがTPに属しているというスコアを返す。
+パターン集合の配列、
+あるいは
+
+```javascript
+{
+  positive: []
+  negative: []
+}
+```
+で表現されるようなパターン集合の集合 (要するに extract_pattern.coffee の返り値)
+と、ドキュメント (文の集合)
+を取って、
+クラスを返す。
+クラスとは、パターン集合の配列のときには、そのインデックス、
+そうでないときは 'positive', 'negative' という文字列。
+
+さて、分類は単なる多数決.
 
 index.coffee
----
+===
 
-文書集合 TP, TQ, U を受け取って
-UがP, Q どちらに属するか
-{P, Neutral, Q}
-のスコアで返す
+i-th element が
+i-th class document (文の集合)
+である配列 `docs`
+を用意したとき,
 
-author.coffee
+```coffee
+patterns = extract docs
+```
+
+は、i-th element が i-th class 向けの
+パターン集合である配列。
+これを用いて、未知の document `doc` についての分類は、
+
+```coffee
+k = classify pattern, doc
+```
+
+とする。 (0 <= k <= n-1)
+
+同じだけど、二値分類の時は、
+
+```coffee
+patterns = extract
+  positive: doc_P
+  negative: doc_Q
+
+label = classify patterns, doc
+# label = 'positive' or 'negative'
+```
+
+author/
 ===
 
 作者別に、小説にはパターンがあるのではないか。
 
-doc/
----
+### Dazai class - 斜陽, ダスゲマイネ, 女生徒
+curl http://www.aozora.gr.jp/cards/000035/files/1565_8559.html | nkf > doc/d_a
+curl http://www.aozora.gr.jp/cards/000035/files/42945_14904.html | nkf > doc/d_b
+curl http://www.aozora.gr.jp/cards/000035/files/275_13903.html | nkf > doc/d_c
 
-### 太宰治
-```
-http://www.aozora.gr.jp/cards/000035/card275.html > doc/joseito.txt
-http://www.aozora.gr.jp/cards/000035/card42945.html > doc/dasgemeine.txt
-http://www.aozora.gr.jp/cards/000035/card2253.html > doc/viyon.txt
-```
+### Shimazaki class - 嵐, 朝飯, 食堂
+curl http://www.aozora.gr.jp/cards/000158/files/1511_20470.html | nkf > doc/s_a
+curl http://www.aozora.gr.jp/cards/000158/files/2949_48819.html | nkf > doc/s_b
+curl http://www.aozora.gr.jp/cards/000158/files/47172_34186.html | nkf > doc/s_c
 
-### 島崎藤村
-```
-http://www.aozora.gr.jp/cards/000158/card1511.html > doc/arashi.txt
-http://www.aozora.gr.jp/cards/000158/card2949.html > doc/asameshi.txt
-http://www.aozora.gr.jp/cards/000158/card47172.html > doc/shokudo.txt
-```
+青空文庫から、htmlファイルをダウンロードして、
+句点のみで文として区切って、一つのdocumentとして扱う。
+htmlタグの除去はしてない。
+`nkf`しているのは、utf-8にしたいから。
 
-|  作品          | 文の数 |
-|:---------------|-------:|
-| 女生徒         |    961 |
-| ダス・ゲマイネ |    839 |
-| ヴィヨンの妻   |    494 |
-| 嵐             |   1264 |
-| 朝飯           |    132 |
-| 食堂           |    447 |
-
-学習のもとはある程度多くて、
-できれば両者バランスを取った方がいいだろう。
-
-```
-TP = ヴィヨンの妻
-TQ = 食堂
+```bash
+cd author
+make
 ```
 
-|  作品          |  P  |  N  |  Q  | P <> Q |
-|:---------------|----:|----:|----:|:------:|
-| 女生徒         | 178 | 708 |  75 |   P    |
-| ダス・ゲマイネ | 215 | 537 |  87 |   P    |
-| ヴィヨンの妻   | 261 | 224 |   9 |   P    |
-| 嵐             | 114 | 962 | 188 |   Q    |
-| 朝飯           |  12 |  78 |  42 |   Q    |
-| 食堂           |  81 | 270 |  96 |   Q    |
-
-自分で自分自身を診断してるのは、
-当然ながら正しく判定されていて当然。
-ある種のテストのつもりで。
-
-で、上の表は上手く行ってるのだけれど、
-「あんまり上手くはいかない」ってことを
-本当は書きたかった。
-
-というのも、学習に使う作品の選び方によっては、
-随分結果が変わるから。
-
-
 ```
-TP = 女生徒
-TQ = 嵐
+result is Shimazaki and expected is Dazai
+result is Dazai and expected is Dazai
+result is Dazai and expected is Dazai
+result is Shimazaki and expected is Shimazaki
+result is Shimazaki and expected is Shimazaki
+result is Shimazaki and expected is Shimazaki
 ```
 
-|  作品          |  P  |  N  |  Q  | P <> Q |
-|:---------------|----:|----:|----:|:------:|
-| 女生徒         | 356 | 444 | 161 | P |
-| ダス・ゲマイネ | 43 | 507 | 289 | Q |
-| ヴィヨンの妻   | 139 | 154 | 201 | Q |
-| 嵐             | 12 | 226 | 1026 | Q |
-| 朝飯           | 24 | 60 | 48 | Q |
-| 食堂           | 81 | 161 | 205 | Q |
+## 学習されたパターン
 
-たんじゅんに学習は多いほうがいいだろう、としたら、
-全部、島崎藤村と判定した。
+`learned.json` として学習したパターンを出力した.
+重複があることに註意。
 
-一番文が多い嵐を使ったから？
+### Dazai class
 
-```
-TP = 女生徒
-TQ = 嵐[0 ... 500]
-```
+- X、X、X
+- おX、X
+- Xのだ
+- XんXてX、X
+- XんXてX、X
+- X、X
+- X、X
+- X、X
+- X、X
+- X、X
 
-女生徒 961 に対して、嵐 500.
+### Shimazaki class
 
+- X&lt;bXrX
+が8つ
 
-|  作品          |  P  |  N  |  Q  | P <> Q |
-|:---------------|----:|----:|----:|:------:|
-| 女生徒         | 441 | 438 |  82 | P |
-| ダス・ゲマイネ | 101 | 472 | 266 | Q |
-| ヴィヨンの妻   |  95 | 340 |  59 | P |
-| 嵐             | 159 | 454 | 651 | Q |
-| 朝飯           |  25 |  79 |  28 | Q |
-| 食堂           | 326 |  80 |  41 | P |
-
-勝率 66.67% (学習元データも含むけど)
-多ければいいわけでない、ってのが不思議だ。
-
-ちなみに、女生徒も500に限定すると、食堂を正しく Q と判定して、 勝率。7/8 になった。
-
+ひどかった。
+Shimazaki class の
+(X&lt;bXrX)
+は、明らかに、改行タグのことだろう。

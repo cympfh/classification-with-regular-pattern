@@ -1,46 +1,25 @@
-ep = require './extract-pattern'
-get_score = require './score'
-{pattern2str} = require './syntax'
+extract_pattern = require './extract-pattern'
+pattern_classify = require './pattern-classify'
 
-module.exports = (TP, TQ, U, options) ->
-  options = {} if not options
-
-  if options.balance
-    N = Math.max TP.length, TQ.length
-    TP = TP[0 ... N]
-    TQ = TQ[0 ... N]
-
-  if options.iteration?
-    iteration = options.iteration
+extract = (docs) ->
+  if docs.positive? and docs.negative?
+    patterns = extract_pattern [docs.positive, docs.negative]
+    positive: patterns[0]
+    negative: patterns[1]
+  else if docs instanceof Array
+    extract_pattern docs
   else
-    iteration = (TP.length / 9) | 0
+    throw new Error docs
 
-  if options.threshold?
-    threshold = options.threshold
+classify = (patterns, d) ->
+  if patterns.positive? and patterns.negative?
+    klass = pattern_classify [patterns.positive, patterns.negative], d
+    if klass is 0 then 'positive' else 'negative'
+  else if patterns instanceof Array
+    pattern_classify patterns, d
   else
-    threshold = null
+    throw new Error patterns
 
-  PiP = ep iteration, threshold, TP, TQ
-  PiQ = ep iteration, threshold, TQ, TP
-
-  if options.debug?
-    console.warn "## pattern for P (#{PiP.length})"
-    PiP.forEach (p) -> console.log pattern2str p
-    console.warn "## pattern for P (#{PiQ.length})"
-    PiQ.forEach (p) -> console.log pattern2str p
-
-  score =
-    P: 0
-    N: 0
-    Q: 0
-
-  U.forEach (d) ->
-    score_P = get_score d, PiP, TP, TQ
-    score_Q = get_score d, PiQ, TQ, TP
-    switch
-      when score_P > score_Q then ++score.P
-      when score_P < score_Q then ++score.Q
-      else ++score.N
-
-  return score
-  
+## export
+exports.extract = extract
+exports.classify = classify
