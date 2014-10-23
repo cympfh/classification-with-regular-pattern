@@ -1,13 +1,13 @@
 extract_pattern = require './extract-pattern'
 pattern_classify = require './pattern-classify'
 
-extract = (docs) ->
+extract = (docs, options) ->
   if docs.positive? and docs.negative?
-    patterns = extract_pattern [docs.positive, docs.negative]
+    patterns = extract_pattern [docs.positive, docs.negative], options
     positive: patterns[0]
     negative: patterns[1]
   else if docs instanceof Array
-    extract_pattern docs
+    extract_pattern docs, options
   else
     throw new Error docs
 

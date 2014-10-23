@@ -137,7 +137,7 @@ extract-pattern.coffee
 > `k` は、初め選んだドキュメントのクラスと一致していてほしいのだけど、
 > そう上手くも行かなかった。
 > 
-> 閾値 `m` を設定し、(今は `0` としている)
+> 閾値 `m` を設定し、(options から渡す. default=0)
 > 相互情報量が `m` よりも真に大きかったら、
 > `p`
 > を
@@ -179,26 +179,49 @@ pattern-classify.coffee
 index.coffee
 ===
 
-i-th element が
-i-th class document (文の集合)
-である配列 `docs`
-を用意したとき,
+- extract docs [, {threshold}]
+- classify patterns, doc
+
+### extract
+
+- documentとは文の配列である
+- documentの列とは次のどちらかである
+    - documentの配列
+    - positive と negative の二つのプロパティを持つObjectで、それぞれの要素がdocument
+- 配列で表現された列は、i番目の要素はi-th class のdocumentと解釈される
+- Objectで表現された列は、positive要素のdocumentは'positive' class のdocumentと解釈し、negative要素についても同様。
+
+extractは、documentの列を受け取って、
+patternの列を返す。
+
+- patternの列とは次のどちらかである
+    - patternの配列
+    - positive と negative の二つのプロパティを持つObjectで、それぞれの要素がpattern
+
 
 ```coffee
 patterns = extract docs
 ```
+または
+```coffee
+options =
+  threshold: 0.01
+patterns = extract docs, options
+```
 
-は、i-th element が i-th class 向けの
-パターン集合である配列。
-これを用いて、未知の document `doc` についての分類は、
+### classify
+
+classify は、patternの列を受け取って、クラスのラベルを返す。
+
+- クラスのラベルは、受け取ったpatternの列の表現に依存する
+    - patternの配列の時、それが持つindexがクラスのラベル
+    - Objectのとき、文字列 'positive' と 'negative' のみがクラスのラベル
 
 ```coffee
 k = classify pattern, doc
 ```
 
-とする。 (0 <= k <= n-1)
-
-二値分類の時に限り、次のように書いても良いことにした。
+または
 
 ```coffee
 patterns = extract
@@ -206,7 +229,6 @@ patterns = extract
   negative: doc_Q
 
 label = classify patterns, doc
-# label = 'positive' or 'negative'
 ```
 
 author/

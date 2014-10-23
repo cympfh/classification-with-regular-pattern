@@ -38,7 +38,7 @@ max_index = (ls) ->
       mi = i
   mi
 
-extract_pattern = (docs, debug = false) ->
+extract_pattern = (docs, options) ->
 
   N = docs.length
   lens = for d in docs
@@ -49,7 +49,7 @@ extract_pattern = (docs, debug = false) ->
     []
 
   # mutual information threshold
-  #m = EP.length / (EP.length + EQ.length) * 1.1
+  m = options.threshold ? 0
 
   iterate = 1000
 
@@ -79,7 +79,7 @@ extract_pattern = (docs, debug = false) ->
         pnot = 1 - pmatch
         pmatchy * Math.log (pmatchy / pmatch / py) + pnoty * Math.log (pnoty / pnot / py))
 
-      if MI > 0
+      if MI > m
         j = max_index matches
         ranks[j].push
           pattern: p
