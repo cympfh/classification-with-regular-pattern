@@ -1,5 +1,5 @@
-read = require './read'
-pattern_classify = require './index'
+read = require '../read'
+pattern_classify = require '../index'
 
 # docs
 joseito = read './doc/joseito.txt'

@@ -1,19 +1,36 @@
 mcp = require './mcp'
 
-assert = (s, t, q) ->
-  p = mcp s, t
-  console.assert (p.length is q.length), "#{JSON.stringify p}, #{JSON.stringify q}"
-  for i in [0 ... p.length]
-    a = p[i]
-    b = q[i]
-    console.assert ((a.str? and b.str? and a.str is b.str) or (a.var? and b.var?))
-    , "#{JSON.stringify p}, #{JSON.stringify q}"
+variable = []
 
-assert 'This is X', 'This is Y', [{str:'This is '}, {var:0}]
-assert 'Cat and dog', 'Cats and dogs', [{str:'Cat'}, {var:1},{str:' and dog'},{var:2}]
+assert = (s, t, result) ->
+  p = mcp s, t
+  
+  I = p.length
+  J = result.length
+
+  if I isnt J
+    console.warn "expected: %j,\nbut %j", result, p
+    process.exit 1
+
+  for i in [0 ... I]
+    e = p[i]
+    r = result[i]
+
+    if e.str? and e.str is r
+      # ok
+    else if e.var? and r is variable
+      # ok
+    else
+      console.warn "expected: %j, but %j", result, p
+      process.exit 1
+
+assert 'This is X', 'This is Y' , ['This is ', variable]
+assert 'Cat and dog', 'Cats and dogs', ['Cat',variable,' and dog',variable]
 assert '１日に、44回も夕ぐれを見たことがあるよ！'
   , 'その44回ながめた日は、じゃあすっごくせつなかったの？'
-  , [{"var":3},{"str":"44回"},{"var":4},{"str":"た"},{"var":5},{"str":"あ"},{"var":6}]
+  , [variable, '44回', variable, 'た', variable, 'あ', variable]
 
-assert 'The empty is allowed', 'empty is allowed'
-  , [{"var":7},{"str":"empty is allowed"}]
+assert 'empty is not allowed', 'empty is allowed'
+  , ['empty is ', variable, 'allowed']
+
+assert 'ABCXYcZT', 'XYZTABC', [variable, 'XY', variable, 'ZT', variable]

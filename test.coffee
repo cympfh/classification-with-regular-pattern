@@ -1,7 +1,3 @@
-###
-# Minimum common pattern
-###
-
 {new_var, sub_str} = require './syntax'
 
 merge = (pat) ->
@@ -26,11 +22,7 @@ module.exports = (s, t) ->
   table = for i in [0 .. S]
     for j in [0 .. T]
       len: 0
-      pat: [(new_var())]
-
-  table[0][0] =
-    len: 0
-    pat: []
+      pat: []
 
   for i in [0 ... S]
     for j in [0 ... T]
@@ -60,10 +52,11 @@ module.exports = (s, t) ->
         maxi = i
         maxj = j
 
-  ###
+  ### debug
   for i in [0 .. S]
     console.warn table[i].map (obj) -> obj.len
   ###
 
   merge table[S][T].pat
 
+module "GHandIJKor", "ABCandDEFor"

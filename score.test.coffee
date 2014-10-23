@@ -12,4 +12,3 @@ TQ = ['toast', 'gosh']
 
 console.warn score d, Pi, TP, TQ, true
 console.warn score d, Pi, TP, TQ, true
-
