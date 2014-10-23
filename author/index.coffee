@@ -15,6 +15,7 @@ console.warn "stat"
 for d in docs
   console.warn "#{d.content.length} sentences"
 
+
 training_datum =
   positive: docs[2].content[0 ... 1000]
   negative: docs[3].content[0 ... 1000]

@@ -19,18 +19,16 @@ merge = (pat) ->
 
   ret
 
-module.exports = (s, t) ->
+mcp = (s, t) ->
+  s = s.split ''
+  t = t.split ''
   S = s.length
   T = t.length
 
   table = for i in [0 .. S]
     for j in [0 .. T]
       len: 0
-      pat: [(new_var())]
-
-  table[0][0] =
-    len: 0
-    pat: []
+      pat: if (i is 0 and j is 0) then [] else [(new_var())]
 
   for i in [0 ... S]
     for j in [0 ... T]
@@ -50,20 +48,7 @@ module.exports = (s, t) ->
           len: l2
           pat: table[i][j+1].pat .concat (new_var())
 
-  maxx = -1
-  maxi = -1
-  maxj = -1
-  for i in [0 ... S]
-    for j in [0 ... T]
-      if maxx < table[i+1][j+1]
-        maxx = table[i+1][j+1]
-        maxi = i
-        maxj = j
-
-  ###
-  for i in [0 .. S]
-    console.warn table[i].map (obj) -> obj.len
-  ###
-
   merge table[S][T].pat
 
+#module.exports = mcp
+module.exports = require('./mcp/build/Release/mcp.node').mcp
