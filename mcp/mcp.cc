@@ -113,6 +113,14 @@ Handle<Value> Mcp(const Arguments& args) {
   }
 
   /*
+   * free table
+   */
+  for (int i=0; i<=n; ++i) {
+    delete[] table[i];
+  }
+  delete[] table;
+
+  /*
    * C++ -> Node.js
    */
   int len = ret0.size();
@@ -126,6 +134,7 @@ Handle<Value> Mcp(const Arguments& args) {
     us[ren] = 0;
     //for (int j=0; j < ren+1; ++j) cerr << ret0[i][j] << ' '; cerr << endl;
     ret->Set(i, String::New(us));
+    delete us;
   }
 
   return scope.Close(ret);

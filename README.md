@@ -258,7 +258,6 @@ curl http://www.aozora.gr.jp/cards/000158/files/47172_34186.html | nkf > doc/s_c
 
 青空文庫から、htmlファイルをダウンロードして、
 句点のみで文として区切って、一つのdocumentとして扱う。
-htmlタグの除去はしてない。
 `nkf`しているのは、utf-8にしたいから。
 
 ### 実験
@@ -272,62 +271,42 @@ $ make
 ```
 
 ### 結果
+
+htmlタグの除去をしてなかった。
+タグを含むパターンは、自然に学習しないだろう、と期待したから。
+結果的には、失敗で、
+訓練データでは `<br />` をShimazakiが多く含む、
+これが足を引っ張った。
+
 ```
 result is Shimazaki and expected is Dazai
-result is Dazai and expected is Dazai
+result is Dazai and expected is Dazai (怪しい)
 result is Dazai and expected is Dazai
 result is Shimazaki and expected is Shimazaki
 result is Shimazaki and expected is Shimazaki
 result is Shimazaki and expected is Shimazaki
 ```
 
-## 学習されたパターン
+`(怪しい)` は、実行の度に結構、どっちにも推定されることを示す。
 
-`learned.json` として学習したパターンを出力した.
-重複があることに註意。
+### じゃあhtmlタグを除いた(現状のプログラム)。
 
-### Dazai class
+```
+result is Dazai and expected is Dazai
+result is Shimazaki and expected is Dazai (怪しい)
+result is Dazai and expected is Dazai
+result is Shimazaki and expected is Shimazaki
+result is Shimazaki and expected is Shimazaki (怪しい)
+result is Shimazaki and expected is Shimazaki (怪しい)
+```
 
-- X、X、X
-- おX、X
-- Xのだ
-- XんXてX、X
-- XんXてX、X
-- X、X
-- X、X
-- X、X
-- X、X
-- X、X
+推定を単純に多数決にしてるのがダメで、
+さすがにもうちっとこだわったことをすべき。
 
-本当に読点ばっかり
+### TODO
 
-### Shimazaki class
+- classify
+    - EM
+    - SVM
 
-- X&lt;bXrX
-がたくさん
 
-ひどかった。
-Shimazaki class の
-(X&lt;bXrX)
-は、明らかに、改行タグのことだろう。
-
-### 反省点
-
-I counted `<br />` in each documents.
-
-| class     | number |                                         |
-|:----------|-------:|:----------------------------------------|
-| Dazai     | 9705   | this document was predicted incorrectly |
-| Dazai     | 1310   |                                         |
-| Dazai     | 1200   | training for positive                   |
-| Shimazaki | 4265   | training for negative                   |
-| Shimazaki | 425    |                                         |
-| Shimazaki | 1585   |                                         |
-
-次のような考察は容易だ。
-`<br />` は偶然訓練データでは、Shimazakiに大きく働いた。
-一番初めのテストデータは実は、今回使ったテストデータ中で最も大きいものだったが、
-それにしても、実際 `<br />` を多く含んでいたので、Shimazakiとした。
-
-これは、訓練データが小さいのがしょうがない。
-だから、今回は不問とする。
