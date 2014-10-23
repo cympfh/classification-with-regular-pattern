@@ -48,7 +48,7 @@ extract_pattern = (docs, options) ->
   # mutual information threshold
   m = options?.threshold ? 0
 
-  iterate = 1000
+  iterate = options?.iterate ? 100
 
   for k in [0 ... iterate]
 
