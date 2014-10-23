@@ -42,7 +42,7 @@ extract_pattern = (docs, options) ->
     d.length
   sum_lens = lens.reduce add
 
-  ranks = for i in [0 ... N]
+  pis = for i in [0 ... N]
     []
 
   # mutual information threshold
@@ -51,7 +51,6 @@ extract_pattern = (docs, options) ->
   iterate = options?.iterate ? 100
 
   for k in [0 ... iterate]
-
     for i in [0 ... N]
       d = docs[i]
 
@@ -74,25 +73,36 @@ extract_pattern = (docs, options) ->
         py = lens[j] / sum_lens
         pnoty = (lens[j] - matches[j]) / sum_lens
         pnot = 1 - pmatch
-        pmatchy * Math.log (pmatchy / pmatch / py) + pnoty * Math.log (pnoty / pnot / py))
+
+        mi0 = pmatchy * Math.log (pmatchy / pmatch / py)
+        mi1 = pnoty * Math.log (pnoty / pnot / py)
+
+        mi0 + mi1)
 
       if MI > m
         j = max_index matches
-        ranks[j].push
+        pis[j].push
           pattern: p
           mi: MI
 
-  # filter better patterns from ranks
+  # filter better patterns from pis
   for i in [0 ... N]
-    if not (ranks[i])
-      console.warn ranks.length, i
-    ranks[i].sort (a, b) -> - a.mi + b.mi
+    pis[i].sort (a, b) -> - a.mi + b.mi
 
-  M = Math.min.apply null, (ranks.map (r) -> r.length)
-  M = M/100
+  M = Math.min.apply null, (pis.map (r) -> r.length)
+  M = Math.min M, (Math.max 10, M/10) | 0
+  console.warn "card", M
 
   sets = for i in [0 ... N]
-    ranks[i][0 ... M].map (o) -> o.pattern
+    ls = []
+    last = 0
+    idx = 0
+    while ls.length < M and idx < pis[i].length
+      if pis[i][idx].mi isnt last
+        last = pis[i][idx].mi
+        ls.push pis[i][idx].pattern
+      ++idx
+    ls
 
   sets
 

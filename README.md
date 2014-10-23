@@ -293,10 +293,26 @@ result is Shimazaki and expected is Shimazaki (怪しい)
 result is Shimazaki and expected is Shimazaki (怪しい)
 ```
 
-推定を単純に多数決にしてるのがダメで、
-さすがにもうちっとこだわったことをすべき。
+### パターン選択
+
+相互情報量の高いものから定数個、パターンを選択してたけど、
+重複しないパターンを選択するようにした。
+
+```
+result is Dazai and expected is Dazai
+result is Dazai and expected is Dazai
+result is Dazai and expected is Dazai
+result is Shimazaki and expected is Shimazaki
+result is Shimazaki and expected is Shimazaki
+result is Shimazaki and expected is Shimazaki
+```
+
+完璧だ。
 
 ### TODO
+
+一応できてるっぽいけど、
+分類で、多数決ってのはダサい。
 
 - classify
     - EM

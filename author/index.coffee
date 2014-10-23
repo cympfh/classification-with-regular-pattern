@@ -21,9 +21,8 @@ training_datum =
   negative: docs[3].content[0 ... 1000]
 
 options =
-  threshold: 0.01
-  iterate: 200
-
+  threshold: 0
+  iterate: 400
 
 patterns =
   pattern.extract training_datum, options
