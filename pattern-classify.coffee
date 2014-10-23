@@ -1,7 +1,11 @@
 {can_generalize, pattern2str} = require './syntax'
 
 add = (x, y) -> x + y
-sum = (ls) -> ls.reduce add
+sum = (ls) ->
+  if ls.length is 0
+    0
+  else
+    ls.reduce add
 
 classify = (patterns, doc) ->
   N = patterns.length

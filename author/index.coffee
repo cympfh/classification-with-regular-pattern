@@ -20,12 +20,18 @@ training_datum =
   positive: docs[2].content[0 ... 1000]
   negative: docs[3].content[0 ... 1000]
 
+options =
+  threshold: 0.01
+  iterate: 200
+
+
 patterns =
-  pattern.extract training_datum
+  pattern.extract training_datum, options
 
 fs.writeFileSync './learned.json', (JSON.stringify patterns)
 
 # test
 for d in docs
   result = pattern.classify patterns, d.content
-  console.log "result is #{if result is 'positive' then 'Dazai' else 'Shimazaki'} and expected is #{d.class}"
+  label = if result is 'positive' then 'Dazai' else 'Shimazaki'
+  console.log "result is #{label} and expected is #{d.class}"
