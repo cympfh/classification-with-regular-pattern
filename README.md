@@ -198,7 +198,7 @@ k = classify pattern, doc
 
 とする。 (0 <= k <= n-1)
 
-同じだけど、二値分類の時は、
+二値分類の時に限り、次のように書いても良いことにした。
 
 ```coffee
 patterns = extract
@@ -215,14 +215,18 @@ author/
 作者別に、小説にはパターンがあるのではないか。
 
 ### Dazai class - 斜陽, ダスゲマイネ, 女生徒
+```bash
 curl http://www.aozora.gr.jp/cards/000035/files/1565_8559.html | nkf > doc/d_a
 curl http://www.aozora.gr.jp/cards/000035/files/42945_14904.html | nkf > doc/d_b
 curl http://www.aozora.gr.jp/cards/000035/files/275_13903.html | nkf > doc/d_c
+```
 
 ### Shimazaki class - 嵐, 朝飯, 食堂
+```bash
 curl http://www.aozora.gr.jp/cards/000158/files/1511_20470.html | nkf > doc/s_a
 curl http://www.aozora.gr.jp/cards/000158/files/2949_48819.html | nkf > doc/s_b
 curl http://www.aozora.gr.jp/cards/000158/files/47172_34186.html | nkf > doc/s_c
+```
 
 青空文庫から、htmlファイルをダウンロードして、
 句点のみで文として区切って、一つのdocumentとして扱う。
@@ -230,10 +234,11 @@ htmlタグの除去はしてない。
 `nkf`しているのは、utf-8にしたいから。
 
 ```bash
-cd author
-make
+$ cd author
+$ make
 ```
 
+### 結果
 ```
 result is Shimazaki and expected is Dazai
 result is Dazai and expected is Dazai
@@ -260,6 +265,8 @@ result is Shimazaki and expected is Shimazaki
 - X、X
 - X、X
 - X、X
+
+本当に読点ばっかり
 
 ### Shimazaki class
 
