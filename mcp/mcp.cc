@@ -10,10 +10,10 @@ using namespace v8;
 
 struct X {
   int len;
-  vector<string> pat;
+  vector<uint16_t> pat;
 };
 
-const string variable = "";
+const uint16_t variable = 0;
 
 Handle<Value> Mcp(const Arguments& args) {
   HandleScope scope;
@@ -29,36 +29,25 @@ Handle<Value> Mcp(const Arguments& args) {
    * Node.js -> C++
    */
 
-  vector<string> s, t;
+  Local<String> s0(args[0]->ToString());
+  int n = s0->Length();
+  uint16_t s[n];
+  s0->Write(s);
 
-  char *s0 = *String::Utf8Value(args[0]->ToString());
-  char cc[2];
-  for (int i=0; s0[i]; ++i) {
-    cc[0] = s0[i];
-    cout << "s0 of " << i << "is " << s0[i] << endl;
-    s.push_back(std::string(1, cc[0]));
-  }
+  Local<String> t0(args[1]->ToString());
+  int m = t0->Length();
+  uint16_t t[m];
+  t0->Write(t);
 
-  char *t0 = *String::Utf8Value(args[1]->ToString());
-  for (int i=0; t0[i]; ++i) {
-    t.push_back(std::string(1, t0[i]));
-  }
-
-  cout << s.size() << endl;
-  for (int i=0; i<s.size(); ++i) cout << s[i] << ' '; cout << endl;
-  cout << t.size() << endl;
-  for (int i=0; i<t.size(); ++i) cout << t[i] << ' '; cout << endl;
+  //for (int i=0;i<n;++i) cerr << s[i] << ' '; cerr << endl;
+  //for (int i=0;i<m;++i) cerr << t[i] << ' '; cerr << endl;
 
   // init table
-  int n = s.size();
-  int m = t.size();
-
   X **table = new X*[n+1];
-  for (int i=0; i<n; ++i) {
+  for (int i=0; i<=n; ++i) {
     table[i] = new X[m+1];
-    for (int j=0; j<m; ++j) {
+    for (int j=0; j<=m; ++j) {
       table[i][j].len = 0;
-      cout << "table " << i << ", " << j << table[i][j].len << endl;
       if (i != 0 || j != 0) table[i][j].pat.push_back(variable);
     }
   }
@@ -87,27 +76,37 @@ Handle<Value> Mcp(const Arguments& args) {
     }
   }
 
-  cout << "a" << endl;
-  cout << table[0][0].len << endl;
-  cout << "b" << endl;
+  /*
+  // debug
+  for (int i=0; i<n; ++i) {
+    for (int j=0; j<m; ++j) {
+      cerr << table[i][j].len << ' ';
+    }
+    cerr << endl;
+  }
+  */
 
   // merging
-  vector<string> ret0;
-  string last = table[n][m].pat[0];
-  ret0.push_back(table[n][m].pat[0]);
+  vector<vector<uint16_t> > ret0;
+  uint16_t last = table[n][m].pat[0];
+  ret0.push_back(vector<uint16_t>());
+  ret0[0].push_back(table[n][m].pat[0]);
 
   for (int i=1, len = table[n][m].pat.size(); i<len; ++i) {
-    if (last == "") { // last was var
-      if (table[n][m].pat[i] == "") {
+    if (last == variable) { // last was var
+      if (table[n][m].pat[i] == variable) {
         // pass
       } else {
-        ret0.push_back(table[n][m].pat[i]);
+        // push char
+        ret0.push_back(vector<uint16_t>(1, table[n][m].pat[i]));
       }
     } else {
-      if (table[n][m].pat[i] == "") {
-        ret0.push_back(variable);
+      if (table[n][m].pat[i] == variable) {
+        // push var
+        ret0.push_back(vector<uint16_t>(1, variable));
       } else {
-        ret0[ret0.size() - 1] = ret0[ret0.size() - 1] + table[n][m].pat[i];
+        // concat char
+        ret0[ret0.size() - 1].push_back(table[n][m].pat[i]);
       }
     }
     last = table[n][m].pat[i];
@@ -119,7 +118,14 @@ Handle<Value> Mcp(const Arguments& args) {
   int len = ret0.size();
   Local<Array> ret = Array::New(len);
   for (int i=0; i<len; ++i) {
-    ret->Set(i, String::New(ret0[i].c_str()));
+    int ren = ret0[i].size();
+    uint16_t *us = new uint16_t[ren + 1];
+    for (int j=0; j < ren; ++j) {
+      us[j] = ret0[i][j];
+    }
+    us[ren] = 0;
+    //for (int j=0; j < ren+1; ++j) cerr << ret0[i][j] << ' '; cerr << endl;
+    ret->Set(i, String::New(us));
   }
 
   return scope.Close(ret);

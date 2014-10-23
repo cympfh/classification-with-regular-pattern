@@ -50,5 +50,14 @@ mcp = (s, t) ->
 
   merge table[S][T].pat
 
-#module.exports = mcp
-module.exports = require('./mcp/build/Release/mcp.node').mcp
+try
+  mcp_core = require('./mcp/build/Release/mcp.node').mcp
+  module.exports = (s, t) ->
+    p = mcp_core s, t
+    for i in [0 ... p.length]
+      if p[i].length is 0
+        new_var()
+      else
+        sub_str p[i]
+catch e
+  module.exports = mcp

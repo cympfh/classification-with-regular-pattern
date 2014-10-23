@@ -106,6 +106,12 @@ mcp.coffee
 二つの文字列から、極小の共有汎化 (minimum common generalization) の一つを探す。
 二つの文字列の長さを`n,m`とするとき`O(nm)`で動く。
 
+To fasten `x2`,
+
+```bash
+cd mcp; make
+```
+
 
 パターン分類
 ===

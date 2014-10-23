@@ -10,6 +10,7 @@ assert = (s, t, result) ->
 
   if I isnt J
     console.warn "expected: %j,\nbut %j", result, p
+    console.warn "hint: the lengths are different"
     process.exit 1
 
   for i in [0 ... I]
@@ -22,6 +23,7 @@ assert = (s, t, result) ->
       # ok
     else
       console.warn "expected: %j, but %j", result, p
+      console.warn "hint: '#{r}' and '#{e.str}'"
       process.exit 1
 
 assert 'This is X', 'This is Y' , ['This is ', variable]
