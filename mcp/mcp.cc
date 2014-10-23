@@ -28,16 +28,26 @@ Handle<Value> Mcp(const Arguments& args) {
   /*
    * Node.js -> C++
    */
-  char *s0 = *String::Utf8Value(args[0]->ToString());
-  char *t0 = *String::Utf8Value(args[1]->ToString());
 
   vector<string> s, t;
+
+  char *s0 = *String::Utf8Value(args[0]->ToString());
+  char cc[2];
   for (int i=0; s0[i]; ++i) {
-    s.push_back(std::string(1, s0[i]));
+    cc[0] = s0[i];
+    cout << "s0 of " << i << "is " << s0[i] << endl;
+    s.push_back(std::string(1, cc[0]));
   }
-  for (int i=0; s0[i]; ++i) {
+
+  char *t0 = *String::Utf8Value(args[1]->ToString());
+  for (int i=0; t0[i]; ++i) {
     t.push_back(std::string(1, t0[i]));
   }
+
+  cout << s.size() << endl;
+  for (int i=0; i<s.size(); ++i) cout << s[i] << ' '; cout << endl;
+  cout << t.size() << endl;
+  for (int i=0; i<t.size(); ++i) cout << t[i] << ' '; cout << endl;
 
   // init table
   int n = s.size();
@@ -48,6 +58,7 @@ Handle<Value> Mcp(const Arguments& args) {
     table[i] = new X[m+1];
     for (int j=0; j<m; ++j) {
       table[i][j].len = 0;
+      cout << "table " << i << ", " << j << table[i][j].len << endl;
       if (i != 0 || j != 0) table[i][j].pat.push_back(variable);
     }
   }
@@ -75,6 +86,10 @@ Handle<Value> Mcp(const Arguments& args) {
       }
     }
   }
+
+  cout << "a" << endl;
+  cout << table[0][0].len << endl;
+  cout << "b" << endl;
 
   // merging
   vector<string> ret0;
