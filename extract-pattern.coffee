@@ -17,12 +17,12 @@
 mcp = require './mcp'
 {can_generalize, pattern2str} = require './syntax'
 
+isBR = (pat) ->
+  pat.length is 6 and pat[0].str is '<' and pat[1].var?  and pat[2].str is 'b' and pat[3].var?  and pat[4].str is 'r' and pat[5].var?
+
 random_select = (list) ->
   I = list.length
-
-  if I is 0
-    return false
-
+  return false if I is 0
   idx = (do Math.random) * I | 0
   list[idx]
 
@@ -49,7 +49,7 @@ extract_pattern = (docs, options) ->
     []
 
   # mutual information threshold
-  m = options.threshold ? 0
+  m = options?.threshold ? 0
 
   iterate = 1000
 
@@ -79,6 +79,12 @@ extract_pattern = (docs, options) ->
         pnot = 1 - pmatch
         pmatchy * Math.log (pmatchy / pmatch / py) + pnoty * Math.log (pnoty / pnot / py))
 
+      if isBR p
+        console.warn MI
+        console.warn pattern2str p
+        console.warn matches
+
+
       if MI > m
         j = max_index matches
         ranks[j].push
@@ -86,12 +92,16 @@ extract_pattern = (docs, options) ->
           mi: MI
 
   # filter better patterns from ranks
-  sets = []
   for i in [0 ... N]
+    if not (ranks[i])
+      console.warn ranks.length, i
     ranks[i].sort (a, b) -> - a.mi + b.mi
-    sets[i] = for j in [0 ... iterate/100]
-      #console.warn pattern2str ranks[i][j].pattern
-      ranks[i][j].pattern
+
+  M = Math.min.apply null, (ranks.map (r) -> r.length)
+  M = M/100
+
+  sets = for i in [0 ... N]
+    ranks[i][0 ... M].map (o) -> o.pattern
 
   sets
 

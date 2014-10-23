@@ -255,6 +255,11 @@ curl http://www.aozora.gr.jp/cards/000158/files/47172_34186.html | nkf > doc/s_c
 htmlタグの除去はしてない。
 `nkf`しているのは、utf-8にしたいから。
 
+### 実験
+
+女生徒をpositive document, 嵐をnegative document としてパターンを展開し、
+それを使って分類する。
+
 ```bash
 $ cd author
 $ make
@@ -293,9 +298,30 @@ result is Shimazaki and expected is Shimazaki
 ### Shimazaki class
 
 - X&lt;bXrX
-が8つ
+がたくさん
 
 ひどかった。
 Shimazaki class の
 (X&lt;bXrX)
 は、明らかに、改行タグのことだろう。
+
+### 反省点
+
+I counted `<br />` in each documents.
+
+| class     | number |                                         |
+|:----------|-------:|:----------------------------------------|
+| Dazai     | 9705   | this document was predicted incorrectly |
+| Dazai     | 1310   |                                         |
+| Dazai     | 1200   | training for positive                   |
+| Shimazaki | 4265   | training for negative                   |
+| Shimazaki | 425    |                                         |
+| Shimazaki | 1585   |                                         |
+
+次のような考察は容易だ。
+`<br />` は偶然訓練データでは、Shimazakiに大きく働いた。
+一番初めのテストデータは実は、今回使ったテストデータ中で最も大きいものだったが、
+それにしても、実際 `<br />` を多く含んでいたので、Shimazakiとした。
+
+これは、訓練データが小さいのがしょうがない。
+だから、今回は不問とする。
