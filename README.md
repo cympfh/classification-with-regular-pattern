@@ -106,29 +106,22 @@ mcp.coffee
 二つの文字列から、極小の共有汎化 (minimum common generalization) の一つを探す。
 二つの文字列の長さを`n,m`とするとき`O(nm)`で動く。
 
-To fasten `x2`,
+To fasten x2,
 
 ```bash
 cd mcp; make
+# this requires `node-gyp`
 ```
 
-
-パターン分類
+Text classification with pattens
 ===
 
-さて、文章について、二つのクラス、P, Q があるとき、
-Pに属する文章は、
-あるパターン集合 `PiP` によって、
-Qに属する文章は、
-あるパターン集合 `PiQ` によって、
-生成されるという仮定を立てる。
+class `1 .. n` に対応した document `d1 .. dn` があるとき、
+document `di` は、
+パターン集合 `Pi[i]` によって生成される言語だという仮定を立てる。
 
-Pの為の訓練データ (文章の集合) TP と、
-Qの為のそれ、TQ を用意したときに、
-
-PiP, PiQ を構成ですれば、
-適当に、未知の文章 U に対して、
-スコア附けてPかQか判定できる。
+パターン集合の列 `Pi` を学習することで、
+未知のドキュメント `d'` の class を推定できる。
 
 extract-pattern.coffee
 ---
