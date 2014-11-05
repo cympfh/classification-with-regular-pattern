@@ -18,6 +18,7 @@ can_generalize = (p, str) ->
   return true
 
 pattern2str = (p) ->
+  p = p.pattern if p.pattern?
   each = (o) ->
     switch
       when o.str? then o.str

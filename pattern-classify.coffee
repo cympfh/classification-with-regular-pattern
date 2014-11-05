@@ -10,7 +10,7 @@ sum = (ls) ->
 classify = (patterns, doc) ->
   N = patterns.length
   scores = for i in [0 ... N]
-    sum (for p in patterns[i]
+    sum (for {pattern:p} in patterns[i]
       sum (for d in doc
         if can_generalize p, d then 1 else 0))
 
