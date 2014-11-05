@@ -80,8 +80,20 @@ extract_pattern = (docs, options) ->
         pnoty = (lens[j] - matches[j]) / sum_lens
         pnot = 1 - pmatch
 
-        mi0 = pmatchy * Math.log (pmatchy / pmatch / py)
-        mi1 = pnoty * Math.log (pnoty / pnot / py)
+        mi0 = switch
+          when pmatchy is 0
+            0
+          when pmatch is 0 or py is 0
+            Infinity
+          else
+            pmatchy * Math.log (pmatchy / pmatch / py)
+        mi1 = switch
+          when pnoty is 0
+            0
+          when pnot is 0 or py is 0
+            Infinity
+          else
+            pnoty * Math.log (pnoty / pnot / py)
 
         mi0 + mi1)
 
