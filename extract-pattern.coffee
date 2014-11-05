@@ -90,13 +90,13 @@ extract_pattern = (docs, options) ->
     pis[i].sort (a, b) -> - a.mi + b.mi
 
   M = Math.min.apply null, (pis.map (r) -> r.length)
-  M = Math.min M, (Math.max 10, M/10) | 0
 
   sets = for i in [0 ... N]
     ls = []
-    last = 0
+    last = []
     idx = 0
-    while ls.length < M and idx < pis[i].length
+    #while ls.length < M and idx < pis[i].length
+    while idx < pis[i].length
       if noteq pis[i][idx].pattern, last
         last = pis[i][idx].pattern
         ls.push pis[i][idx]

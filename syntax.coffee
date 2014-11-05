@@ -22,6 +22,7 @@ pattern2str = (p) ->
   each = (o) ->
     switch
       when o.str? then o.str
+      when o.var? then "(x)"
       when o.var? then "(x#{o.var})"
       else o.toString()
   p.map each
@@ -33,11 +34,12 @@ noteq = (p, q) ->
   for i in [0 ... I]
     if p[i].str?
       if q[i].str?
-        return true if p[i].str isnt q[i]
+        return true if p[i].str isnt q[i].str
       else
         return true
     else
-      return true
+      if q[i].str?
+        return true
   false
 
 exports.new_var = new_var
