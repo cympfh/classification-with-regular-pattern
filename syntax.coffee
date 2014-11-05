@@ -26,7 +26,21 @@ pattern2str = (p) ->
   p.map each
     .join ''
 
+noteq = (p, q) ->
+  return true if p.length isnt q.length
+  I = p.length
+  for i in [0 ... I]
+    if p[i].str?
+      if q[i].str?
+        return true if p[i].str isnt q[i]
+      else
+        return true
+    else
+      return true
+  false
+
 exports.new_var = new_var
 exports.sub_str = sub_str
 exports.can_generalize = can_generalize
 exports.pattern2str = pattern2str
+exports.noteq = noteq

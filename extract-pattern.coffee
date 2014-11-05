@@ -15,7 +15,7 @@
 ###
 
 mcp = require './mcp'
-{can_generalize, pattern2str} = require './syntax'
+{can_generalize, pattern2str, noteq} = require './syntax'
 
 random_select = (list) ->
   I = list.length
@@ -91,16 +91,16 @@ extract_pattern = (docs, options) ->
 
   M = Math.min.apply null, (pis.map (r) -> r.length)
   M = Math.min M, (Math.max 10, M/10) | 0
-  console.warn "card", M
 
   sets = for i in [0 ... N]
     ls = []
     last = 0
     idx = 0
     while ls.length < M and idx < pis[i].length
-      if pis[i][idx].mi isnt last
-        last = pis[i][idx].mi
-        ls.push pis[i][idx].pattern
+      if noteq pis[i][idx].pattern, last
+        last = pis[i][idx].pattern
+        ls.push pis[i][idx]
+        #console.warn pis[i][idx].mi, (pattern2str pis[i][idx].pattern)
       ++idx
     ls
 

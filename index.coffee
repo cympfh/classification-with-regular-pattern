@@ -1,3 +1,4 @@
+syntax = require './syntax'
 extract_pattern = require './extract-pattern'
 pattern_classify = require './pattern-classify'
 
@@ -23,3 +24,4 @@ classify = (patterns, d) ->
 ## export
 exports.extract = extract
 exports.classify = classify
+exports.pattern2str = syntax.pattern2str
