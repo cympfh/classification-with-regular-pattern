@@ -26,6 +26,12 @@ random_select = (list) ->
 add = (x, y) -> x + y
 sum = (ls) -> ls.reduce add
 
+uniq = (noteq, ls) ->
+  ret = []
+  for x in ls
+    ret.push x if ret.every (y) -> noteq x,y
+  ret
+
 max_index = (ls) ->
   mx = ls[0]
   mi = 0
@@ -91,19 +97,7 @@ extract_pattern = (docs, options) ->
 
   M = Math.min.apply null, (pis.map (r) -> r.length)
 
-  sets = for i in [0 ... N]
-    ls = []
-    last = []
-    idx = 0
-    #while ls.length < M and idx < pis[i].length
-    while idx < pis[i].length
-      if noteq pis[i][idx].pattern, last
-        last = pis[i][idx].pattern
-        ls.push pis[i][idx]
-        #console.warn pis[i][idx].mi, (pattern2str pis[i][idx].pattern)
-      ++idx
-    ls
-
-  sets
+  for pi in pis
+    uniq ((p,q) -> noteq p.pattern, q.pattern), pi
 
 module.exports = extract_pattern
